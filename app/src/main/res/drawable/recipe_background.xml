@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#EC6F66"
+        android:endColor="#F3A183"
+        android:type="linear"
+        android:angle="90" />
+    <!--Messenger gradient-->
+    <!--#00c6ff -> #0072ff-->
+    <!--Martini-->
+    <!--#FDFC47 -> #24FE41-->
+
+</shape>

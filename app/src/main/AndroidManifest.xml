@@ -23,6 +23,12 @@
 
         <activity android:name=".ui.StepDetailActivity" />
 
+        <receiver android:name=".ui.fragment.StepDetailFragment$MediaReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
         <provider
             android:name=".provider.RecipeContentProvider"
             android:authorities="com.example.dharanaditya.cookbook"

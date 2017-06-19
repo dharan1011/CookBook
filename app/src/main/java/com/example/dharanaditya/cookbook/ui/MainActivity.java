@@ -1,6 +1,7 @@
 package com.example.dharanaditya.cookbook.ui;
 
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -8,10 +9,12 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import com.example.dharanaditya.cookbook.R;
 import com.example.dharanaditya.cookbook.model.Ingredient;
@@ -34,11 +37,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnRecipeItemClickListener, LoaderManager.LoaderCallbacks<Cursor> {
     //    Activity to show list of available recipe
     public static final String RECIPE_INDEX_EXTRA = "recipe_index_extra";
+    public static final String RECIPE_NAME_EXTRA = "recipe_name_extra";
     public static final String TAG = MainActivity.class.getSimpleName();
     private static final int LOADER_ID = 1001;
 
     @BindView(R.id.rcv_recipe_list)
     RecyclerView recipeRecyclerView;
+    @BindView(R.id.pb_fetch_data)
+    ProgressBar progressBar;
     RecipeAdapter recipeAdapter;
 
     Cursor cursor;
@@ -48,8 +54,8 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        // TODO
-//        clearData();
+        // TODO Remove Clear Database
+        clearData();
         recipeAdapter = new RecipeAdapter(this);
 
         recipeRecyclerView.setHasFixedSize(true);
@@ -61,22 +67,21 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
 
         // Query the database. If empty download the data a persist it locally in database
         if (getContentResolver().query(RecipeContract.RecipeEntry.CONTENT_URI, null, null, null, null).getCount() == 0) {
-            // TODO show Progress bar
-            // clear the database before fetching data
+            // show Progress bar and hide recyclerView
+            showProgressBar();
             clearData();
-            // fetch the data from the internet
             fetchData();
         } else
             // if data is already downloaded
             getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
-    private void clearData() {
-        getContentResolver().delete(RecipeContract.RecipeEntry.CONTENT_URI, null, null);
-        getContentResolver().delete(RecipeContract.IngredientEntry.CONTENT_URI, null, null);
-        getContentResolver().delete(RecipeContract.StepEntry.CONTENT_URI, null, null);
+    private void showProgressBar() {
+        progressBar.setVisibility(View.VISIBLE);
+        recipeRecyclerView.setVisibility(View.INVISIBLE);
     }
 
+    // fetch the data from the internet
     private void fetchData() {
         Retrofit builder = new Retrofit.Builder()
                 .baseUrl(RecipeService.BASE_URL)
@@ -85,21 +90,56 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
         final RecipeService recipeService = builder.create(RecipeService.class);
         Call<List<Recipe>> call = recipeService.fetchRecipes();
         call.enqueue(new Callback<List<Recipe>>() {
-            // TODO hide progress bar
+
             @Override
             public void onResponse(Call<List<Recipe>> call, Response<List<Recipe>> response) {
                 // insert the data in local database
                 insertRecipesIntoDatabase(response.body());
+
+                // hide progress bar and show recycler view
+                hideProgressBar();
                 // Initialize loader to fetch data from database when data is inserted into database
                 getSupportLoaderManager().initLoader(LOADER_ID, null, MainActivity.this);
             }
 
             @Override
             public void onFailure(Call<List<Recipe>> call, Throwable t) {
-                // TODO handle failure
-                Log.d(TAG, "onFailure: " + t.getLocalizedMessage());
+                //TODO Debug Handle
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Failed to fetch content")
+                        .setMessage("Please make sure you are connected to Internet")
+                        .setPositiveButton("Exit", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                System.exit(0);
+                            }
+                        }).show();
             }
         });
+    }
+
+    private void hideProgressBar() {
+        progressBar.setVisibility(View.INVISIBLE);
+        recipeRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    /*
+    * Responds to recipe RecyclerView item clicks
+    * @params position : position of view holder to load the steps and ingredients corresponding recipe id
+    *
+    * */
+    @Override
+    public void onItemClick(int position) {
+        Intent i = new Intent(this, StepsListActivity.class);
+        cursor.moveToPosition(position);
+        i.putExtra(RECIPE_INDEX_EXTRA, cursor.getInt(cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_ID)));
+        i.putExtra(RECIPE_NAME_EXTRA, cursor.getString(cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_NAME)));
+        startActivity(i);
     }
 
     private void insertRecipesIntoDatabase(List<Recipe> body) {
@@ -145,22 +185,12 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
         getContentResolver().bulkInsert(RecipeContract.IngredientEntry.CONTENT_URI, ingredientContentValues);
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    /*
-        * Responds to recipe RecyclerView item clicks
-        * @params position : position of view holder to load the steps and ingredients corresponding recipe id
-        *
-        * */
-    @Override
-    public void onItemClick(int position) {
-        Intent i = new Intent(this, StepsListActivity.class);
-        cursor.moveToPosition(position);
-        i.putExtra(RECIPE_INDEX_EXTRA, cursor.getInt(cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_ID)));
-        startActivity(i);
+    // Used only for debug stage
+    // clear the database before fetching data
+    private void clearData() {
+        getContentResolver().delete(RecipeContract.RecipeEntry.CONTENT_URI, null, null);
+        getContentResolver().delete(RecipeContract.IngredientEntry.CONTENT_URI, null, null);
+        getContentResolver().delete(RecipeContract.StepEntry.CONTENT_URI, null, null);
     }
 
     @Override

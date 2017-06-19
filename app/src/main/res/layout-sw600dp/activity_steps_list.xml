@@ -9,12 +9,13 @@
         android:layout_height="match_parent"
         android:layout_weight="1" />
     <View
-        android:layout_width="1dp"
+        android:id="@+id/two_pane_ref"
+        android:layout_width="2dp"
         android:layout_height="match_parent"
         android:background="@android:color/black" />
     <FrameLayout
         android:id="@+id/container_steps_detail"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="3" />
+        android:layout_weight="1" />
 </LinearLayout>

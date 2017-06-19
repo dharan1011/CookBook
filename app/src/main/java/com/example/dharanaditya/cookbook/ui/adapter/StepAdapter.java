@@ -1,26 +1,17 @@
 package com.example.dharanaditya.cookbook.ui.adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.dharanaditya.cookbook.R;
 import com.example.dharanaditya.cookbook.model.Step;
 import com.example.dharanaditya.cookbook.provider.RecipeContract;
-import com.example.dharanaditya.cookbook.ui.StepDetailActivity;
 import com.example.dharanaditya.cookbook.ui.fragment.StepListFragment;
-
-import org.parceler.Parcels;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -81,7 +72,7 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
         }
 
         public void bind(int id, String shortDescription) {
-            idTextView.setText(Integer.toString(id + 1));
+            idTextView.setText(Integer.toString(id));
             shortDescriptionTextView.setText(shortDescription);
         }
 

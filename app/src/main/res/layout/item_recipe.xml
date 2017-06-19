@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView android:id="@+id/cv_recipe_item"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cv_recipe_item"
     android:layout_width="match_parent"
     android:layout_height="200dp"
     android:layout_margin="8dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:focusable="true"
     app:cardCornerRadius="8dp"
     app:cardElevation="8dp"
-    app:cardMaxElevation="16dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    app:cardMaxElevation="16dp">
     <!--Frame Layout to apply gradient background to card view-->
     <FrameLayout
         android:layout_width="match_parent"

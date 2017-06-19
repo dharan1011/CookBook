@@ -31,9 +31,7 @@ public class StepDetailActivity extends AppCompatActivity implements StepDetailF
 
             step = Parcels.unwrap(getIntent().getParcelableExtra(RECIPE_STEP_EXTRA));
 
-            //TODO load all step corresponding to recipe id
             if (savedInstanceState == null) {
-                // TODO fetch all step corresponding to recipe id all
                 stepList = getStepsWithRecipeId(Integer.toString(getIntent().getIntExtra(RECIPE_ID, 0)));
 
                 StepDetailFragment stepDetailFragment = new StepDetailFragment();
@@ -50,8 +48,9 @@ public class StepDetailActivity extends AppCompatActivity implements StepDetailF
 //        }
     }
 
+    // Quires the Step Table with parameter recipe id
+    // Fetches all the step and populates into List
     private List<Step> getStepsWithRecipeId(String intExtra) {
-        // TODO
         List<Step> stepList = new ArrayList<>();
         Cursor cursor = getContentResolver().query(RecipeContract.StepEntry.CONTENT_URI,
                 null,
@@ -80,6 +79,8 @@ public class StepDetailActivity extends AppCompatActivity implements StepDetailF
         outState.putParcelable(STEP_STATE_KEY, Parcels.wrap(stepList));
     }
 
+    // Replace current fragment with new fragment by passing next step object
+    // When click in last step. Finished the activity
     @Override
     public void onNextButtonClick(int id) {
         if (id < stepList.size()) {

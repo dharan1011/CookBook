@@ -25,7 +25,8 @@ import butterknife.ButterKnife;
 
 public class StepListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String TAG = StepListFragment.class.getSimpleName();
-    private static int LOADER_ID = 2002;
+    private static final int STEP_LOADER_ID = 2002;
+    private static final int INGREDIENTS_LOADER_ID = 2003;
     @BindView(R.id.rcv_step_list)
     RecyclerView stepRecyclerView;
     private OnStepClickListener mListener;
@@ -34,30 +35,6 @@ public class StepListFragment extends Fragment implements LoaderManager.LoaderCa
 
     public StepListFragment() {
         // Required empty public constructor
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getLoaderManager().initLoader(LOADER_ID, null, this);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_step_list, container, false);
-        ButterKnife.bind(this, v);
-        stepRecyclerView.setHasFixedSize(true);
-        stepRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        stepRecyclerView.setAdapter(stepAdapter);
-
-        return v;
     }
 
     @Override
@@ -80,6 +57,30 @@ public class StepListFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getLoaderManager().initLoader(STEP_LOADER_ID, null, this);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View v = inflater.inflate(R.layout.fragment_step_list, container, false);
+        ButterKnife.bind(this, v);
+        stepRecyclerView.setHasFixedSize(true);
+        stepRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        stepRecyclerView.setAdapter(stepAdapter);
+
+        return v;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
@@ -87,21 +88,44 @@ public class StepListFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getContext(), RecipeContract.StepEntry.CONTENT_URI,
+        switch (id) {
+            case STEP_LOADER_ID:
+                return new CursorLoader(getContext(), RecipeContract.StepEntry.CONTENT_URI,
                 null,
                 RecipeContract.StepEntry.COLUMN_RECIPE_ID + "=?",
                 new String[]{recipeId},
                 null);
+            case INGREDIENTS_LOADER_ID:
+                return new CursorLoader(getContext(), RecipeContract.IngredientEntry.CONTENT_URI,
+                        null,
+                        RecipeContract.IngredientEntry.COLUMN_RECIPE_ID + "=?",
+                        new String[]{recipeId},
+                        null);
+            default:
+                return null;
+        }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        stepAdapter.swapCursor(data);
+        switch (loader.getId()) {
+            case STEP_LOADER_ID:
+                stepAdapter.swapCursor(data);
+                break;
+            case INGREDIENTS_LOADER_ID:
+//                //TODO
+                break;
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        stepAdapter.swapCursor(null);
+        switch (loader.getId()) {
+            case STEP_LOADER_ID:
+                stepAdapter.swapCursor(null);
+                break;
+            case INGREDIENTS_LOADER_ID: //TODO
+        }
     }
 
     /**

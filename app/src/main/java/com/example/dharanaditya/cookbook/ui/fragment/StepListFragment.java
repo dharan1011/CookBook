@@ -15,14 +15,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.dharanaditya.cookbook.R;
-import com.example.dharanaditya.cookbook.model.Ingredient;
 import com.example.dharanaditya.cookbook.model.Step;
 import com.example.dharanaditya.cookbook.provider.RecipeContract;
+import com.example.dharanaditya.cookbook.ui.StepsListActivity;
 import com.example.dharanaditya.cookbook.ui.adapter.StepAdapter;
-
-import org.parceler.Parcels;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,11 +26,9 @@ import butterknife.ButterKnife;
 public class StepListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String TAG = StepListFragment.class.getSimpleName();
     private static int LOADER_ID = 2002;
-    private OnStepClickListener mListener;
-
     @BindView(R.id.rcv_step_list)
     RecyclerView stepRecyclerView;
-
+    private OnStepClickListener mListener;
     private StepAdapter stepAdapter;
     private String recipeId;
 
@@ -74,9 +68,12 @@ public class StepListFragment extends Fragment implements LoaderManager.LoaderCa
 
             stepAdapter = new StepAdapter(context);
             stepAdapter.setStepClickListener(mListener);
-            recipeId = getArguments().getString("recipe_id");
+
+            recipeId = getArguments().getString(StepsListActivity.RECIPE_ID);
+
             Log.d(TAG, "onAttach: " + recipeId);
         } else {
+            // TODO handle error case
             throw new RuntimeException(context.toString()
                     + " must implement OnStepClickListener");
         }

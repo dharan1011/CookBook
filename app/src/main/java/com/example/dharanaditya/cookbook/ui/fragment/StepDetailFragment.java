@@ -44,20 +44,16 @@ import butterknife.OnClick;
  */
 public class StepDetailFragment extends Fragment implements SimpleExoPlayer.EventListener {
     public static final String TAG = StepDetailFragment.class.getSimpleName();
-
-    private SimpleExoPlayer exoPlayer;
-    private MediaSessionCompat mediaSession;
-    private PlaybackStateCompat.Builder playbackStateBuilder;
-
-    private OnNextButtonClickListener nextButtonClickListener;
-
     @BindView(R.id.video_player)
     SimpleExoPlayerView simpleExoPlayerView;
     @BindView(R.id.tv_step_description)
     TextView descriptionTextView;
     @BindView(R.id.btn_next_step)
     Button nextStepButton;
-
+    private SimpleExoPlayer exoPlayer;
+    private MediaSessionCompat mediaSession;
+    private PlaybackStateCompat.Builder playbackStateBuilder;
+    private OnNextButtonClickListener nextButtonClickListener;
     private Step currentStep;
 
     public StepDetailFragment() {
@@ -171,7 +167,7 @@ public class StepDetailFragment extends Fragment implements SimpleExoPlayer.Even
 
     @OnClick(R.id.btn_next_step)
     public void nextStep(View v) {
-        nextButtonClickListener.onNextButtonClick(currentStep.getId());
+        nextButtonClickListener.onNextButtonClick(currentStep.getId() + 1);
     }
 
     public interface OnNextButtonClickListener {

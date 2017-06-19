@@ -33,6 +33,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnRecipeItemClickListener, LoaderManager.LoaderCallbacks<Cursor> {
     //    Activity to show list of available recipe
+    public static final String RECIPE_INDEX_EXTRA = "recipe_index_extra";
     public static final String TAG = MainActivity.class.getSimpleName();
     private static final int LOADER_ID = 1001;
 
@@ -55,10 +56,12 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
         recipeRecyclerView.setLayoutManager(
                 new GridLayoutManager(this, (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) ? 1 : 2)
         );
+        // set recycler view adapter
         recipeRecyclerView.setAdapter(recipeAdapter);
 
         // Query the database. If empty download the data a persist it locally in database
         if (getContentResolver().query(RecipeContract.RecipeEntry.CONTENT_URI, null, null, null, null).getCount() == 0) {
+            // TODO show Progress bar
             // clear the database before fetching data
             clearData();
             // fetch the data from the internet
@@ -82,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
         final RecipeService recipeService = builder.create(RecipeService.class);
         Call<List<Recipe>> call = recipeService.fetchRecipes();
         call.enqueue(new Callback<List<Recipe>>() {
+            // TODO hide progress bar
             @Override
             public void onResponse(Call<List<Recipe>> call, Response<List<Recipe>> response) {
                 // insert the data in local database
@@ -92,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
 
             @Override
             public void onFailure(Call<List<Recipe>> call, Throwable t) {
+                // TODO handle failure
                 Log.d(TAG, "onFailure: " + t.getLocalizedMessage());
             }
         });
@@ -106,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
             recipeContentValue[i].put(RecipeContract.RecipeEntry.COLUMN_RECIPE_SERVINGS, body.get(i).getServings());
             recipeContentValue[i].put(RecipeContract.RecipeEntry.COLUMN_RECIPE_IMAGE, body.get(i).getImage());
 
+            // insert recipe's step and ingredients into database
             insertIngredientsIntoDatabase(body.get(i).getIngredients(), body.get(i).getId());
             insertStepsIntoDatabase(body.get(i).getSteps(), body.get(i).getId());
         }
@@ -153,18 +159,21 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
     public void onItemClick(int position) {
         Intent i = new Intent(this, StepsListActivity.class);
         cursor.moveToPosition(position);
-        i.putExtra("recipe_id", cursor.getInt(cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_ID)));
+        i.putExtra(RECIPE_INDEX_EXTRA, cursor.getInt(cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_ID)));
         startActivity(i);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // Loader to query the database about Recipe
         return new CursorLoader(this, RecipeContract.RecipeEntry.CONTENT_URI, null, null, null, null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        // temporary cursor to store queried data
         cursor = data;
+        // set cursor to adapter
         recipeAdapter.swapCursor(data);
     }
 

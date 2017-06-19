@@ -18,17 +18,12 @@ import com.example.dharanaditya.cookbook.R;
 import com.example.dharanaditya.cookbook.model.Step;
 import com.example.dharanaditya.cookbook.ui.StepDetailActivity;
 import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
@@ -42,22 +37,18 @@ import butterknife.OnClick;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class StepDetailFragment extends Fragment implements SimpleExoPlayer.EventListener {
+public class StepDetailFragment extends Fragment {
     public static final String TAG = StepDetailFragment.class.getSimpleName();
-
-    private SimpleExoPlayer exoPlayer;
-    private MediaSessionCompat mediaSession;
-    private PlaybackStateCompat.Builder playbackStateBuilder;
-
-    private OnNextButtonClickListener nextButtonClickListener;
-
     @BindView(R.id.video_player)
     SimpleExoPlayerView simpleExoPlayerView;
     @BindView(R.id.tv_step_description)
     TextView descriptionTextView;
     @BindView(R.id.btn_next_step)
     Button nextStepButton;
-
+    private SimpleExoPlayer exoPlayer;
+    private MediaSessionCompat mediaSession;
+    private PlaybackStateCompat.Builder playbackStateBuilder;
+    private OnNextButtonClickListener nextButtonClickListener;
     private Step currentStep;
 
     public StepDetailFragment() {
@@ -75,7 +66,7 @@ public class StepDetailFragment extends Fragment implements SimpleExoPlayer.Even
     private void initializePlayer() {
 
         exoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), new DefaultTrackSelector(), new DefaultLoadControl());
-        exoPlayer.addListener(this);
+//        exoPlayer.addListener(this);
         simpleExoPlayerView.setPlayer(exoPlayer);
 
         MediaSource mediaSource = new DashMediaSource(
@@ -91,7 +82,7 @@ public class StepDetailFragment extends Fragment implements SimpleExoPlayer.Even
 
     private void releasePlayer() {
         exoPlayer.release();
-        exoPlayer.removeListener(this);
+//        exoPlayer.removeListener(this);
         exoPlayer = null;
     }
 
@@ -134,44 +125,9 @@ public class StepDetailFragment extends Fragment implements SimpleExoPlayer.Even
         }
     }
 
-    @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest) {
-
-    }
-
-    @Override
-    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
-    }
-
-    @Override
-    public void onLoadingChanged(boolean isLoading) {
-
-    }
-
-    @Override
-    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-
-    }
-
-    @Override
-    public void onPlayerError(ExoPlaybackException error) {
-
-    }
-
-    @Override
-    public void onPositionDiscontinuity() {
-
-    }
-
-    @Override
-    public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
-    }
-
     @OnClick(R.id.btn_next_step)
     public void nextStep(View v) {
-        nextButtonClickListener.onNextButtonClick(currentStep.getId());
+        nextButtonClickListener.onNextButtonClick(currentStep.getId() + 1);
     }
 
     public interface OnNextButtonClickListener {

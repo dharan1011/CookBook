@@ -4,19 +4,18 @@ package com.example.dharanaditya.cookbook.ui.fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.dharanaditya.cookbook.R;
@@ -44,6 +43,7 @@ import org.parceler.Parcels;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Optional;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -51,15 +51,24 @@ import butterknife.OnClick;
 public class StepDetailFragment extends Fragment implements SimpleExoPlayer.EventListener {
 
     public static final String TAG = StepDetailFragment.class.getSimpleName();
-    private static final java.lang.String MEDIA_SESSION_TAG = "media_session_tag";
+    private static final String MEDIA_SESSION_TAG = "media_session_tag";
+    private static final String STEP_STATE_KEY = "step_state_key";
+    private static final String POSITION_STATE_KEY = "exoplayer_position_state_key";
+
     @BindView(R.id.video_player)
     SimpleExoPlayerView simpleExoPlayerView;
+    @Nullable
     @BindView(R.id.tv_step_description)
     TextView descriptionTextView;
+    @Nullable
     @BindView(R.id.btn_next_step)
-    Button nextStepButton;
+    FloatingActionButton nextStepButton;
+    @Nullable
     @BindView(R.id.tv_step_details_error)
     TextView errorTextView;
+    @BindView(R.id.imv_no_video)
+    ImageView noVideoImageView;
+
     private SimpleExoPlayer exoPlayer;
     private MediaSessionCompat mediaSession;
     private PlaybackStateCompat.Builder playbackStateBuilder;
@@ -82,7 +91,7 @@ public class StepDetailFragment extends Fragment implements SimpleExoPlayer.Even
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            setCurrentStep((Step) Parcels.unwrap(savedInstanceState.getParcelable("step_state_key")));
+            setCurrentStep((Step) Parcels.unwrap(savedInstanceState.getParcelable(STEP_STATE_KEY)));
         }
     }
 
@@ -103,12 +112,11 @@ public class StepDetailFragment extends Fragment implements SimpleExoPlayer.Even
             if (!currentStep.getVideoURL().isEmpty())
                 initializeMediaSession();
 
-            //TODO sanitize Step and set data accordingly
             if (exoPlayer == null)
                 initializePlayer(currentStep.getVideoURL());
 
             if (savedInstanceState != null && exoPlayer != null) {
-                exoPlayer.seekTo(savedInstanceState.getLong("play_position_state_key", 0));
+                exoPlayer.seekTo(savedInstanceState.getLong(POSITION_STATE_KEY, 0));
                 exoPlayer.setPlayWhenReady(true);
             }
 
@@ -142,8 +150,8 @@ public class StepDetailFragment extends Fragment implements SimpleExoPlayer.Even
 
     private void initializePlayer(String videoURL) {
         if (videoURL.isEmpty() || videoURL.equals(" ")) {
-            simpleExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.no_video));
-            Log.d(TAG, "initializePlayer: NO Video");
+            noVideoImageView.setVisibility(View.VISIBLE);
+            simpleExoPlayerView.setVisibility(View.INVISIBLE);
             return;
         }
         exoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), new DefaultTrackSelector(), new DefaultLoadControl());
@@ -168,15 +176,16 @@ public class StepDetailFragment extends Fragment implements SimpleExoPlayer.Even
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable("step_state_key", Parcels.wrap(currentStep));
+        outState.putParcelable(STEP_STATE_KEY, Parcels.wrap(currentStep));
         if (exoPlayer != null)
-            outState.putLong("play_position_state_key", exoPlayer.getCurrentPosition());
+            outState.putLong(POSITION_STATE_KEY, exoPlayer.getCurrentPosition());
     }
 
     public void setCurrentStep(Step currentStep) {
         this.currentStep = currentStep;
     }
 
+    @Optional
     private void showErrorMessage() {
         errorTextView.setVisibility(View.VISIBLE);
         simpleExoPlayerView.setVisibility(View.INVISIBLE);
@@ -184,6 +193,7 @@ public class StepDetailFragment extends Fragment implements SimpleExoPlayer.Even
         nextStepButton.setVisibility(View.INVISIBLE);
     }
 
+    @Optional
     @OnClick(R.id.btn_next_step)
     public void nextStep(View v) {
         nextButtonClickListener.onNextButtonClick(currentStep.getId() + 1);

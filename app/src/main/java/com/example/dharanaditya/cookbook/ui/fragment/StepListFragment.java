@@ -18,6 +18,7 @@ import com.example.dharanaditya.cookbook.R;
 import com.example.dharanaditya.cookbook.model.Step;
 import com.example.dharanaditya.cookbook.provider.RecipeContract;
 import com.example.dharanaditya.cookbook.ui.StepsListActivity;
+import com.example.dharanaditya.cookbook.ui.adapter.IngredientAdapter;
 import com.example.dharanaditya.cookbook.ui.adapter.StepAdapter;
 
 import butterknife.BindView;
@@ -27,10 +28,18 @@ public class StepListFragment extends Fragment implements LoaderManager.LoaderCa
     public static final String TAG = StepListFragment.class.getSimpleName();
     private static final int STEP_LOADER_ID = 2002;
     private static final int INGREDIENTS_LOADER_ID = 2003;
+
     @BindView(R.id.rcv_step_list)
     RecyclerView stepRecyclerView;
+
+    @BindView(R.id.rcv_ingredient_list)
+    RecyclerView ingredientRecyclerView;
+
     private OnStepClickListener mListener;
     private StepAdapter stepAdapter;
+
+    private IngredientAdapter ingredientAdapter;
+
     private String recipeId;
 
     public StepListFragment() {
@@ -40,19 +49,17 @@ public class StepListFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnStepClickListener) {
-            mListener = (OnStepClickListener) context;
 
-            stepAdapter = new StepAdapter(context);
+        stepAdapter = new StepAdapter(context);
+        recipeId = getArguments().getString(StepsListActivity.RECIPE_ID);
+        ingredientAdapter = new IngredientAdapter(context);
+
+        if (context instanceof OnStepClickListener) {
+
+            mListener = (OnStepClickListener) context;
             stepAdapter.setStepClickListener(mListener);
 
-            recipeId = getArguments().getString(StepsListActivity.RECIPE_ID);
-
             Log.d(TAG, "onAttach: " + recipeId);
-        } else {
-            // TODO handle error case
-            throw new RuntimeException(context.toString()
-                    + " must implement OnStepClickListener");
         }
     }
 
@@ -60,6 +67,7 @@ public class StepListFragment extends Fragment implements LoaderManager.LoaderCa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getLoaderManager().initLoader(STEP_LOADER_ID, null, this);
+        getLoaderManager().initLoader(INGREDIENTS_LOADER_ID, null, this);
     }
 
     @Override
@@ -72,6 +80,9 @@ public class StepListFragment extends Fragment implements LoaderManager.LoaderCa
         stepRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         stepRecyclerView.setAdapter(stepAdapter);
 
+        ingredientRecyclerView.setHasFixedSize(true);
+        ingredientRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        ingredientRecyclerView.setAdapter(ingredientAdapter);
         return v;
     }
 
@@ -113,7 +124,7 @@ public class StepListFragment extends Fragment implements LoaderManager.LoaderCa
                 stepAdapter.swapCursor(data);
                 break;
             case INGREDIENTS_LOADER_ID:
-//                //TODO
+                ingredientAdapter.swapCursor(data);
                 break;
         }
     }
@@ -124,7 +135,9 @@ public class StepListFragment extends Fragment implements LoaderManager.LoaderCa
             case STEP_LOADER_ID:
                 stepAdapter.swapCursor(null);
                 break;
-            case INGREDIENTS_LOADER_ID: //TODO
+            case INGREDIENTS_LOADER_ID:
+                ingredientAdapter.swapCursor(null);
+                break;
         }
     }
 

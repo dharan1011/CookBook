@@ -3,9 +3,11 @@ package com.example.dharanaditya.cookbook.ui;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -54,8 +56,7 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        // TODO Remove Clear Database
-        clearData();
+
         recipeAdapter = new RecipeAdapter(this);
 
         recipeRecyclerView.setHasFixedSize(true);
@@ -104,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
 
             @Override
             public void onFailure(Call<List<Recipe>> call, Throwable t) {
-                //TODO Debug Handle
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Failed to fetch content")
                         .setMessage("Please make sure you are connected to Internet")
@@ -137,9 +137,17 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
     public void onItemClick(int position) {
         Intent i = new Intent(this, StepsListActivity.class);
         cursor.moveToPosition(position);
-        i.putExtra(RECIPE_INDEX_EXTRA, cursor.getInt(cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_ID)));
+        int recipe_id = cursor.getInt(cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_ID));
+        i.putExtra(RECIPE_INDEX_EXTRA, recipe_id);
         i.putExtra(RECIPE_NAME_EXTRA, cursor.getString(cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_NAME)));
+        updateWidget(recipe_id);
         startActivity(i);
+    }
+
+    private void updateWidget(int recipe_id) {
+        SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(this).edit();
+        preferences.putInt(RECIPE_INDEX_EXTRA, recipe_id);
+        preferences.apply();
     }
 
     private void insertRecipesIntoDatabase(List<Recipe> body) {

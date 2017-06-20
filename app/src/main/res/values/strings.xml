@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Cook Book</string>
+    <string name="recipe_steps_info">Steps</string>
+    <string name="recipe_ingredients_info">Ingredients</string>
+    <string name="appwidget_text">Please select a recipe</string>
+    <string name="add_widget">Add widget</string>
 
 </resources>

@@ -1,5 +1,7 @@
 package com.example.dharanaditya.cookbook.ui;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,6 +21,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.example.dharanaditya.cookbook.R;
+import com.example.dharanaditya.cookbook.RecipeWidget;
 import com.example.dharanaditya.cookbook.model.Ingredient;
 import com.example.dharanaditya.cookbook.model.Recipe;
 import com.example.dharanaditya.cookbook.model.Step;
@@ -140,14 +143,25 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.OnR
         int recipe_id = cursor.getInt(cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_ID));
         i.putExtra(RECIPE_INDEX_EXTRA, recipe_id);
         i.putExtra(RECIPE_NAME_EXTRA, cursor.getString(cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_NAME)));
+
         updateWidget(recipe_id);
         startActivity(i);
     }
 
     private void updateWidget(int recipe_id) {
+        // save the recipe_id on shared preference to access in widget
         SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(this).edit();
         preferences.putInt(RECIPE_INDEX_EXTRA, recipe_id);
         preferences.apply();
+
+        // update the widget to show ingredients corresponding to recipe id
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
+        ComponentName widgetComponent = new ComponentName(this, RecipeWidget.class);
+        int[] widgetIds = widgetManager.getAppWidgetIds(widgetComponent);
+        Intent update = new Intent();
+        update.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
+        update.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        sendBroadcast(update);
     }
 
     private void insertRecipesIntoDatabase(List<Recipe> body) {

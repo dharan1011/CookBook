@@ -1,10 +1,10 @@
 package com.example.dharanaditya.cookbook;
 
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -17,22 +17,27 @@ public class RecipeWidget extends AppWidgetProvider {
 
     public static final String TAG = RecipeWidget.class.getSimpleName();
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
+    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
+                                       int appWidgetId) {
 
-        CharSequence widgetText = context.getString(R.string.appwidget_text);
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.recipe_widget);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), 0);
-        views.setOnClickPendingIntent(R.layout.recipe_widget, pendingIntent);
+        int recipeId = PreferenceManager.getDefaultSharedPreferences(context).getInt(MainActivity.RECIPE_INDEX_EXTRA, 0);
+        Log.d(TAG, "updateAppWidget: " + recipeId);
+        Intent listIntent = new Intent(context, WidgetListService.class);
+        listIntent.putExtra(WidgetListService.EXTRA_WIDGET_RECIPE_ID, recipeId);
+        views.setRemoteAdapter(R.id.widget_ingredient_list, listIntent);
+
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
+
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_ingredient_list);
+
     }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        Log.d(TAG, "onUpdate: ");
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);

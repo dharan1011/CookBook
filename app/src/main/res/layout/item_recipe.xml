@@ -12,10 +12,16 @@
     app:cardElevation="8dp"
     app:cardMaxElevation="16dp">
     <!--Frame Layout to apply gradient background to card view-->
-    <FrameLayout
+    <ImageView
+        android:id="@+id/imv_recipe_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/recipe_background">
+        android:background="@drawable/recipe_background"
+        android:contentDescription="Recipe Image" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
         <!--Text View to Display name of recipe-->
         <TextView
             android:id="@+id/tv_recipe_name"

@@ -6,12 +6,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.dharanaditya.cookbook.R;
 import com.example.dharanaditya.cookbook.model.Step;
 import com.example.dharanaditya.cookbook.provider.RecipeContract;
 import com.example.dharanaditya.cookbook.ui.fragment.StepListFragment;
+import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,6 +44,9 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
             holder.bind(cursor.getInt(
                     cursor.getColumnIndex(RecipeContract.StepEntry.COLUMN_STEP_ID)),
                     cursor.getString(cursor.getColumnIndex(RecipeContract.StepEntry.COLUMN_SHORT_DESCRIPTION)));
+            String url = cursor.getString(cursor.getColumnIndex(RecipeContract.StepEntry.COLUMN_THUMBNAIL_URL));
+            if (!url.isEmpty() && !url.equals(" "))
+                holder.loadImage(url);
         }
     }
 
@@ -60,6 +65,8 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
     }
 
     public class StepViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        @BindView(R.id.imv_step_image)
+        ImageView thumbnailImageView;
         @BindView(R.id.tv_step_id)
         TextView idTextView;
         @BindView(R.id.tv_step_short_description)
@@ -74,6 +81,13 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
         public void bind(int id, String shortDescription) {
             idTextView.setText(Integer.toString(id));
             shortDescriptionTextView.setText(shortDescription);
+        }
+
+        public void loadImage(String url) {
+            Picasso.with(context)
+                    .load(url)
+                    .fit()
+                    .into(thumbnailImageView);
         }
 
         @Override
